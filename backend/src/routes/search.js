@@ -3,18 +3,22 @@ const db = require("../db");
 
 const router = express.Router();
 
-// Buscar imágenes por nombre de archivo
 router.get("/", async (req, res) => {
     try {
         const searchText = String(req.query.q || "").trim();
+        const artist = String(req.query.artist || "").trim();
 
         const [results] = await db.query(
             `SELECT id, fileName, metadata
              FROM images
              WHERE fileName LIKE ?
+             AND (
+                 ? = ''
+                 OR metadata ->> '$.Artist' = ?
+             )
              ORDER BY fileName ASC
              LIMIT 50`,
-            [`%${searchText}%`]
+            [`%${searchText}%`, artist, artist]
         );
 
         res.json({

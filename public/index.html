@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metadata Sökmotor</title>
+</head>
+<body>
+
+    <h1>Metadata Sökmotor</h1>
+    <p>Sök efter bilder och deras metadata.</p>
+
+    <form id="searchForm">
+        <label for="searchInput">Sök efter filnamn:</label>
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Skriv ett filnamn..."
+        >
+        <button type="submit">Sök</button>
+    </form>
+
+    <h2>Sökresultat</h2>
+    <p id="message"></p>
+    <div id="results"></div>
+
+    <script>
+        const form = document.getElementById("searchForm");
+        const input = document.getElementById("searchInput");
+        const results = document.getElementById("results");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const query = input.value.trim();
+
+            results.innerHTML = "";
+            message.textContent = "Söker...";
+
+            try {
+                const response = await fetch(
+                    "/api/search?q=" + encodeURIComponent(query)
+                );
+
+                if (!response.ok) {
+                    throw new Error("Serverfel");
+                }
+
+                const data = await response.json();
+
+                message.textContent =
+                    data.total + " filer hittades.";
+
+                data.results.forEach(function(file) {
+                    const item = document.createElement("div");
+                    const title = document.createElement("h3");
+                    const metadata = document.createElement("pre");
+
+                    title.textContent = file.fileName;
+                    metadata.textContent =
+                        JSON.stringify(file.metadata, null, 2);
+
+                    item.appendChild(title);
+                    item.appendChild(metadata);
+                    results.appendChild(item);
+                });
+
+            } catch (error) {
+                message.textContent =
+                    "Ett fel uppstod vid sökningen.";
+            }
+        });
+    </script>
+
+</body>
+</html>

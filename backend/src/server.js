@@ -2,21 +2,22 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
+const searchRoutes = require("./routes/search");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Permitir solicitudes desde nuestra página web
 app.use(cors());
 app.use(express.json());
 
-// Ruta de prueba para comprobar el servidor
-app.get("/", (req, res) => {
-    res.json({
-        message: "Metadata Search Engine API",
-        status: "OK"
-    });
-});
+// Conectar las rutas de búsqueda
+app.use("/api/search", searchRoutes);
+
+// Mostrar nuestra página HTML
+app.use(express.static(
+    path.join(__dirname, "../../public")
+));
 
 // Iniciar el servidor
 app.listen(PORT, () => {
