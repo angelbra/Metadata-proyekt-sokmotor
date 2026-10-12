@@ -8,7 +8,7 @@
 <body>
 
     <h1>Metadata Sökmotor</h1>
-    <p>Sök efter bilder och deras metadata.</p>
+    <p>Sök efter bilder och filtrera deras metadata.</p>
 
     <form id="searchForm">
         <label for="searchInput">Sök efter filnamn:</label>
@@ -17,6 +17,22 @@
             id="searchInput"
             placeholder="Skriv ett filnamn..."
         >
+
+        <label for="artistFilter">Artist:</label>
+        <select id="artistFilter">
+            <option value="">Alla</option>
+            <option value="AI generated">AI generated</option>
+        </select>
+
+        <label for="minWidth">Minsta bredd (pixlar):</label>
+        <input
+            type="number"
+            id="minWidth"
+            min="0"
+            step="1"
+            placeholder="T.ex. 10000"
+        >
+
         <button type="submit">Sök</button>
     </form>
 
@@ -27,6 +43,8 @@
     <script>
         const form = document.getElementById("searchForm");
         const input = document.getElementById("searchInput");
+        const artistFilter = document.getElementById("artistFilter");
+        const minWidth = document.getElementById("minWidth");
         const results = document.getElementById("results");
         const message = document.getElementById("message");
 
@@ -34,13 +52,21 @@
             event.preventDefault();
 
             const query = input.value.trim();
+            const artist = artistFilter.value;
+            const width = minWidth.value;
 
             results.innerHTML = "";
             message.textContent = "Söker...";
 
             try {
+                const params = new URLSearchParams({
+                    q: query,
+                    artist: artist,
+                    minWidth: width
+                });
+
                 const response = await fetch(
-                    "/api/search?q=" + encodeURIComponent(query)
+                    "/api/search?" + params.toString()
                 );
 
                 if (!response.ok) {
