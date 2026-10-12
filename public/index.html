@@ -11,11 +11,11 @@
     <p>Sök efter bilder och filtrera deras metadata.</p>
 
     <form id="searchForm">
-        <label for="searchInput">Sök efter filnamn:</label>
+        <label for="searchInput">Sök efter filnamn eller metadata:</label>
         <input
             type="text"
             id="searchInput"
-            placeholder="Skriv ett filnamn..."
+            placeholder="Skriv ett sökord..."
         >
 
         <label for="artistFilter">Artist:</label>
@@ -33,6 +33,12 @@
             placeholder="T.ex. 10000"
         >
 
+        <label for="sortOrder">Sortera efter filnamn:</label>
+        <select id="sortOrder">
+            <option value="asc">A–Ö</option>
+            <option value="desc">Ö–A</option>
+        </select>
+
         <button type="submit">Sök</button>
     </form>
 
@@ -45,24 +51,22 @@
         const input = document.getElementById("searchInput");
         const artistFilter = document.getElementById("artistFilter");
         const minWidth = document.getElementById("minWidth");
+        const sortOrder = document.getElementById("sortOrder");
         const results = document.getElementById("results");
         const message = document.getElementById("message");
 
         form.addEventListener("submit", async function(event) {
             event.preventDefault();
 
-            const query = input.value.trim();
-            const artist = artistFilter.value;
-            const width = minWidth.value;
-
             results.innerHTML = "";
             message.textContent = "Söker...";
 
             try {
                 const params = new URLSearchParams({
-                    q: query,
-                    artist: artist,
-                    minWidth: width
+                    q: input.value.trim(),
+                    artist: artistFilter.value,
+                    minWidth: minWidth.value,
+                    sort: sortOrder.value
                 });
 
                 const response = await fetch(

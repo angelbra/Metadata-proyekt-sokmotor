@@ -8,6 +8,7 @@ router.get("/", async (req, res) => {
         const searchText = String(req.query.q || "").trim();
         const artist = String(req.query.artist || "").trim();
         const minWidthText = String(req.query.minWidth || "").trim();
+        const sort = String(req.query.sort || "asc").toLowerCase();
 
         let sql = `
             SELECT id, fileName, metadata
@@ -21,11 +22,13 @@ router.get("/", async (req, res) => {
         const searchPattern = `%${searchText}%`;
         const params = [searchPattern, searchPattern];
 
+        // Filtrera efter Artist
         if (artist) {
             sql += " AND metadata ->> '$.Artist' = ?";
             params.push(artist);
         }
 
+        // Filtrera efter minsta bildbredd
         if (minWidthText !== "") {
             const minWidth = Number(minWidthText);
 
@@ -44,7 +47,14 @@ router.get("/", async (req, res) => {
             params.push(minWidth);
         }
 
-        sql += " ORDER BY fileName ASC LIMIT 50";
+        // Sortera resultaten efter filnamn
+        if (sort === "desc") {
+            sql += " ORDER BY fileName DESC";
+        } else {
+            sql += " ORDER BY fileName ASC";
+        }
+
+        sql += " LIMIT 50";
 
         const [results] = await db.query(sql, params);
 
@@ -54,10 +64,10 @@ router.get("/", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error de búsqueda:", error.message);
+        console.error("Sökfel:", error.message);
 
         res.status(500).json({
-            error: "No se pudo realizar sökningen"
+            error: "Kunde inte genomföra sökningen"
         });
     }
 });
